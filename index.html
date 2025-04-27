@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI-Powered Disaster & Medical Supply Optimization - India</title>
+
+  <!-- Semantic UI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui/dist/semantic.min.css">
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <!-- Navbar -->
+  <div class="ui inverted menu">
+    <a class="header item">Home</a>
+    <a class="item">Dashboard</a>
+    <a class="item">About</a>
+    <a class="item">Help</a>
+    <div class="right menu">
+      
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <div class="ui vertical segment center aligned">
+    <h1 class="ui header">Disaster & Medical Supply Optimization - India</h1>
+    <p>AI-powered allocation tailored for Indian flood zones</p>
+    <button class="ui teal button">Explore Dashboard</button>
+  </div>
+
+  <!-- Stats Section -->
+  <div class="ui three column stackable grid container section-margins">
+    <div class="column">
+      <div class="ui raised segment center aligned">
+        <h4>Faster Response</h4>
+        <h2>{{ faster_response }}%</h2>
+        <p>Boost the deployment</p>
+      </div>
+    </div>
+    <div class="column">
+      <div class="ui raised segment center aligned">
+        <h4>Inventory Managed</h4>
+        <h2>{{ inventory_managed }}%</h2>
+        <p>Reduction in waste</p>
+      </div>
+    </div>
+    <div class="column">
+      <div class="ui raised segment center aligned">
+        <h4>Strategic Allocation</h4>
+        <h2>{{ strategic_allocation }}%</h2>
+        <p>Optimized resources</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard + Map -->
+  <div class="ui stackable grid container section-margins">
+    <div class="eight wide column">
+      <div class="ui segment">
+        <h3 class="ui header">Demand Over Time</h3>
+        <canvas id="supplyDemandChart"></canvas>
+      </div>
+      <div class="ui segment">
+        <h3 class="ui header">Critical Zones</h3>
+        <canvas id="criticalZonesChart"></canvas>
+      </div>
+    </div>
+    <div class="eight wide column">
+      <div class="ui segment">
+        <h3 class="ui header">Inventory Table</h3>
+        <table class="ui celled table">
+          <thead>
+            <tr><th>Item</th><th>Location</th><th>Quantity</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Food</td><td>{{ region }}</td><td>{{ food_needed }}</td><td>In Transit</td></tr>
+            <tr><td>Medicine</td><td>{{ region }}</td><td>{{ medical_needed }}</td><td>Delivered</td></tr>
+            <tr><td>Water</td><td>{{ region }}</td><td>400</td><td>Delivered</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ui segment">
+        <h3 class="ui header">Map View (India)</h3>
+        <div id="map" style="height: 400px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS for Map + Charts -->
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      const lat = {{ latitude }};
+      const lon = {{ longitude }};
+      const prediction = "{{ prediction }}";
+
+      // Set up map bounded to India
+      const indiaBounds = [[6.5, 68.0], [37.5, 97.5]];  // South-west to North-east
+      const map = L.map('map', {
+        maxBounds: indiaBounds,
+        maxZoom: 10,
+        minZoom: 4
+      }).setView([lat, lon], 6);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      const color = prediction === "High Flood Risk" ? "red" :
+                    prediction === "Medium Flood Risk" ? "orange" : "green";
+
+      const circle = L.circle([lat, lon], {
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.6,
+        radius: 12000
+      }).addTo(map);
+
+      circle.bindPopup(<strong>${prediction}</strong><br>Lat: ${lat}, Lon: ${lon});
+
+      // Supply Demand Chart
+      new Chart(document.getElementById('supplyDemandChart'), {
+        type: 'line',
+        data: {
+          labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Today'],
+          datasets: [{
+            label: 'Units Required',
+            data: [1500, 2000, 2500, 3000, {{ food_needed }}],
+            borderColor: 'teal',
+            tension: 0.4,
+            fill: false
+          }]
+        },
+        options: { responsive: true }
+      });
+
+      // Risk Pie Chart
+      new Chart(document.getElementById('criticalZonesChart'), {
+        type: 'pie',
+        data: {
+          labels: ['Low', 'Medium', 'High'],
+          datasets: [{
+            data: [
+              prediction === "Low Flood Risk" ? 1 : 0,
+              prediction === "Medium Flood Risk" ? 1 : 0,
+              prediction === "High Flood Risk" ? 1 : 0
+            ],
+            backgroundColor: ['green', 'orange', 'red']
+          }]
+        },
+        options: { responsive: true }
+      });
+    });
+  </script>
+</body>
+</html>
